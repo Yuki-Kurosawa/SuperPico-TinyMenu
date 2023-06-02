@@ -1,17 +1,18 @@
 #include "TinyMenu.h"
 
 MenuItem *Current = (MenuItem *)NULL;
-MenuItem *Parent = (MenuItem *)NULL;
 
 int nextPin = 3;
 int prevPin = 2;
+int backPin = 15;
+int okPin = 17;
 
-volatile int mindex = 0;
-volatile int sindex = 0;
-volatile int psize = 0;
-volatile int msize = 0;
-volatile int lsize = 0;
-volatile int rsize = 0;
+volatile int menuIndex = 0;
+volatile int selectedIndex = 0;
+volatile int realPageSize = 0;
+volatile int menuSize = 0;
+volatile int firstRowIndex = 0;
+volatile int lastRowIndex = 0;
 
 void renderMenu(MenuItem menu[], int size, int mode);
 void renderMenuNext(MenuItem menu[], int size, int mode);
@@ -19,6 +20,8 @@ void renderMenuPrev(MenuItem menu[], int size, int mode);
 
 void nextButton();
 void prevButton();
+void okButton();
+void backButton();
 
 void initMenu(MenuItem Menu[], int size)
 {
@@ -34,88 +37,88 @@ void renderMenu(MenuItem menu[], int size, int mode)
 {
     if (Current == NULL)
     {
-        rsize = size;
+        lastRowIndex = size;
         if (size < PAGE_SIZE)
         {
-            psize = size;
+            realPageSize = size;
         }
         else
         {
-            rsize = mindex + PAGE_SIZE;
-            psize = PAGE_SIZE;
+            lastRowIndex = menuIndex + PAGE_SIZE;
+            realPageSize = PAGE_SIZE;
         }
-        for (mindex = lsize; mindex < psize; mindex++)
+        for (menuIndex = firstRowIndex; menuIndex < realPageSize; menuIndex++)
         {
-            tft.setCursor(0, 16 * mindex + 4);
-            if (mindex == 0)
+            tft.setCursor(0, 16 * menuIndex + 4);
+            if (menuIndex == 0)
             {
                 tft.fillRect(0, 0 * 16 + 4, 128, 16, ST7735_WHITE);
                 tft.setTextColor(ST7735_BLUE);
-                tft.println(menu[mindex].MenuName);
-                sindex = 0;
+                tft.println(menu[menuIndex].MenuName);
+                selectedIndex = 0;
             }
             else
             {
-                tft.fillRect(0, 16 * mindex + 4, 128, 16, ST7735_BLUE);
+                tft.fillRect(0, 16 * menuIndex + 4, 128, 16, ST7735_BLUE);
                 tft.setTextColor(ST7735_WHITE);
-                tft.println(menu[mindex].MenuName);
+                tft.println(menu[menuIndex].MenuName);
             }
         }
         Current = menu;
-        msize = size;
+        menuSize = size;
     }
     else if (mode > 0)
     {
-        mindex = sindex - mode;
-        int row = mindex - lsize;
+        menuIndex = selectedIndex - mode;
+        int row = menuIndex - firstRowIndex;
         tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_BLUE);
         tft.setTextColor(ST7735_WHITE);
         tft.setCursor(0, row * 16 + 4);
-        tft.println(menu[mindex].MenuName);
+        tft.println(menu[menuIndex].MenuName);
 
-        mindex = sindex;
-        row = mindex - lsize;
+        menuIndex = selectedIndex;
+        row = menuIndex - firstRowIndex;
         tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_WHITE);
         tft.setTextColor(ST7735_BLUE);
         tft.setCursor(0, row * 16 + 4);
-        tft.println(menu[mindex].MenuName);
+        tft.println(menu[menuIndex].MenuName);
     }
     else if (mode < 0)
     {
-        mindex = sindex - mode;
-        int row = mindex - lsize;
+        menuIndex = selectedIndex - mode;
+        int row = menuIndex - firstRowIndex;
         tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_BLUE);
         tft.setTextColor(ST7735_WHITE);
         tft.setCursor(0, row * 16 + 4);
-        tft.println(menu[mindex].MenuName);
+        tft.println(menu[menuIndex].MenuName);
 
-        mindex = sindex;
-        row = mindex - lsize;
+        menuIndex = selectedIndex;
+        row = menuIndex - firstRowIndex;
         tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_WHITE);
         tft.setTextColor(ST7735_BLUE);
         tft.setCursor(0, row * 16 + 4);
-        tft.println(menu[mindex].MenuName);
+        tft.println(menu[menuIndex].MenuName);
     }
 }
 
 void renderMenuNext(MenuItem menu[], int size, int mode)
 {
     tft.fillScreen(ST7735_BLUE);
-    for (mindex = lsize; mindex < rsize; mindex++)
+    for (menuIndex = firstRowIndex; menuIndex < lastRowIndex; menuIndex++)
     {
-        int row = mindex - lsize;
+        int row = menuIndex - firstRowIndex;
         tft.setCursor(0, 16 * row + 4);
-        if (mindex == sindex)
+        if (menuIndex == selectedIndex)
         {
             tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_WHITE);
             tft.setTextColor(ST7735_BLUE);
-            tft.println(menu[mindex].MenuName);
+            tft.println(menu[menuIndex].MenuName);
         }
         else
         {
             tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_BLUE);
             tft.setTextColor(ST7735_WHITE);
-            tft.println(menu[mindex].MenuName);
+            tft.println(menu[menuIndex].MenuName);
         }
     }
 }
@@ -123,57 +126,68 @@ void renderMenuNext(MenuItem menu[], int size, int mode)
 void renderMenuPrev(MenuItem menu[], int size, int mode)
 {
     tft.fillScreen(ST7735_BLUE);
-    for (mindex = lsize; mindex < rsize; mindex++)
+    for (menuIndex = firstRowIndex; menuIndex < lastRowIndex; menuIndex++)
     {
-        int row = mindex - lsize;
+        int row = menuIndex - firstRowIndex;
         tft.setCursor(0, 16 * row + 4);
-        if (mindex == sindex)
+        if (menuIndex == selectedIndex)
         {
             tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_WHITE);
             tft.setTextColor(ST7735_BLUE);
-            tft.println(menu[mindex].MenuName);
+            tft.println(menu[menuIndex].MenuName);
         }
         else
         {
             tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_BLUE);
             tft.setTextColor(ST7735_WHITE);
-            tft.println(menu[mindex].MenuName);
+            tft.println(menu[menuIndex].MenuName);
         }
     }
 }
 
 void nextButton()
 {
-    if (sindex + 1 >= msize)
+    if (selectedIndex + 1 >= menuSize)
         return;
 
-    if (sindex + 1 >= rsize)
+    if (selectedIndex + 1 >= lastRowIndex)
     {
-        rsize++;
-        lsize++;
-        sindex++;
-        renderMenuNext(Current, msize, 1);
+        lastRowIndex++;
+        firstRowIndex++;
+        selectedIndex++;
+        renderMenuNext(Current, menuSize, 1);
         return;
     }
 
-    sindex++;
-    renderMenu(Current, msize, 1);
+    selectedIndex++;
+    renderMenu(Current, menuSize, 1);
 }
 
 void prevButton()
 {
-    if (sindex - 1 < 0)
+    if (selectedIndex - 1 < 0)
         return;
 
-    if (sindex - 1 < lsize)
+    if (selectedIndex - 1 < firstRowIndex)
     {
-        lsize--;
-        rsize--;
-        sindex--;
-        renderMenuPrev(Current, msize, -1);
+        firstRowIndex--;
+        lastRowIndex--;
+        selectedIndex--;
+        renderMenuPrev(Current, menuSize, -1);
         return;
     }
 
-    sindex--;
-    renderMenu(Current, msize, -1);
+    selectedIndex--;
+    renderMenu(Current, menuSize, -1);
 }
+
+void okButton()
+{
+
+}
+
+void backButton()
+{
+
+}
+
