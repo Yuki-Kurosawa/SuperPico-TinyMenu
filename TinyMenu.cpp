@@ -7,16 +7,13 @@ int prevPin = 2;
 int backPin = 15;
 int okPin = 17;
 
-volatile int menuIndex = 0;
 volatile int selectedIndex = 0;
-volatile int realPageSize = 0;
 volatile int menuSize = 0;
 volatile int firstRowIndex = 0;
 volatile int lastRowIndex = 0;
 
 void renderMenu(MenuItem menu[], int size, int mode);
-void renderMenuNext(MenuItem menu[], int size, int mode);
-void renderMenuPrev(MenuItem menu[], int size, int mode);
+void renderMenuMove(MenuItem menu[], int size, int mode);
 
 void nextButton();
 void prevButton();
@@ -35,6 +32,9 @@ void initMenu(MenuItem Menu[], int size)
 
 void renderMenu(MenuItem menu[], int size, int mode)
 {
+    int menuIndex = 0;
+    int realPageSize=0;
+
     if (Current == NULL)
     {
         lastRowIndex = size;
@@ -52,15 +52,15 @@ void renderMenu(MenuItem menu[], int size, int mode)
             tft.setCursor(0, 16 * menuIndex + 4);
             if (menuIndex == 0)
             {
-                tft.fillRect(0, 0 * 16 + 4, 128, 16, ST7735_WHITE);
-                tft.setTextColor(ST7735_BLUE);
+                tft.fillRect(0, 0 * 16 + 4, 128, 16, MenuForeColor);
+                tft.setTextColor(MenuBackColor);
                 tft.println(menu[menuIndex].MenuName);
                 selectedIndex = 0;
             }
             else
             {
-                tft.fillRect(0, 16 * menuIndex + 4, 128, 16, ST7735_BLUE);
-                tft.setTextColor(ST7735_WHITE);
+                tft.fillRect(0, 16 * menuIndex + 4, 128, 16, MenuBackColor);
+                tft.setTextColor(MenuForeColor);
                 tft.println(menu[menuIndex].MenuName);
             }
         }
@@ -71,15 +71,15 @@ void renderMenu(MenuItem menu[], int size, int mode)
     {
         menuIndex = selectedIndex - mode;
         int row = menuIndex - firstRowIndex;
-        tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_BLUE);
-        tft.setTextColor(ST7735_WHITE);
+        tft.fillRect(0, row * 16 + 4, 128, 16, MenuBackColor);
+        tft.setTextColor(MenuForeColor);
         tft.setCursor(0, row * 16 + 4);
         tft.println(menu[menuIndex].MenuName);
 
         menuIndex = selectedIndex;
         row = menuIndex - firstRowIndex;
-        tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_WHITE);
-        tft.setTextColor(ST7735_BLUE);
+        tft.fillRect(0, row * 16 + 4, 128, 16, MenuForeColor);
+        tft.setTextColor(MenuBackColor);
         tft.setCursor(0, row * 16 + 4);
         tft.println(menu[menuIndex].MenuName);
     }
@@ -87,59 +87,38 @@ void renderMenu(MenuItem menu[], int size, int mode)
     {
         menuIndex = selectedIndex - mode;
         int row = menuIndex - firstRowIndex;
-        tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_BLUE);
-        tft.setTextColor(ST7735_WHITE);
+        tft.fillRect(0, row * 16 + 4, 128, 16, MenuBackColor);
+        tft.setTextColor(MenuForeColor);
         tft.setCursor(0, row * 16 + 4);
         tft.println(menu[menuIndex].MenuName);
 
         menuIndex = selectedIndex;
         row = menuIndex - firstRowIndex;
-        tft.fillRect(0, row * 16 + 4, 128, 16, ST7735_WHITE);
-        tft.setTextColor(ST7735_BLUE);
+        tft.fillRect(0, row * 16 + 4, 128, 16, MenuForeColor);
+        tft.setTextColor(MenuBackColor);
         tft.setCursor(0, row * 16 + 4);
         tft.println(menu[menuIndex].MenuName);
     }
 }
 
-void renderMenuNext(MenuItem menu[], int size, int mode)
+void renderMenuMove(MenuItem menu[], int size, int mode)
 {
-    tft.fillScreen(ST7735_BLUE);
+    int menuIndex = 0;
+    tft.fillScreen(MenuBackColor);
     for (menuIndex = firstRowIndex; menuIndex < lastRowIndex; menuIndex++)
     {
         int row = menuIndex - firstRowIndex;
         tft.setCursor(0, 16 * row + 4);
         if (menuIndex == selectedIndex)
         {
-            tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_WHITE);
-            tft.setTextColor(ST7735_BLUE);
+            tft.fillRect(0, 16 * row + 4, 128, 16, MenuForeColor);
+            tft.setTextColor(MenuBackColor);
             tft.println(menu[menuIndex].MenuName);
         }
         else
         {
-            tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_BLUE);
-            tft.setTextColor(ST7735_WHITE);
-            tft.println(menu[menuIndex].MenuName);
-        }
-    }
-}
-
-void renderMenuPrev(MenuItem menu[], int size, int mode)
-{
-    tft.fillScreen(ST7735_BLUE);
-    for (menuIndex = firstRowIndex; menuIndex < lastRowIndex; menuIndex++)
-    {
-        int row = menuIndex - firstRowIndex;
-        tft.setCursor(0, 16 * row + 4);
-        if (menuIndex == selectedIndex)
-        {
-            tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_WHITE);
-            tft.setTextColor(ST7735_BLUE);
-            tft.println(menu[menuIndex].MenuName);
-        }
-        else
-        {
-            tft.fillRect(0, 16 * row + 4, 128, 16, ST7735_BLUE);
-            tft.setTextColor(ST7735_WHITE);
+            tft.fillRect(0, 16 * row + 4, 128, 16, MenuBackColor);
+            tft.setTextColor(MenuForeColor);
             tft.println(menu[menuIndex].MenuName);
         }
     }
@@ -155,7 +134,7 @@ void nextButton()
         lastRowIndex++;
         firstRowIndex++;
         selectedIndex++;
-        renderMenuNext(Current, menuSize, 1);
+        renderMenuMove(Current, menuSize, 1);
         return;
     }
 
@@ -173,7 +152,7 @@ void prevButton()
         firstRowIndex--;
         lastRowIndex--;
         selectedIndex--;
-        renderMenuPrev(Current, menuSize, -1);
+        renderMenuMove(Current, menuSize, -1);
         return;
     }
 
@@ -183,7 +162,7 @@ void prevButton()
 
 void okButton()
 {
-
+    
 }
 
 void backButton()

@@ -6,11 +6,12 @@
 struct MenuItem
 {
   const char* MenuName;
-  MenuItem* SubMenu[];
+  MenuItem (*SubMenu)[];
 };
 
 extern TFT_eSPI tft;
 extern uint16_t MenuBackColor;
+extern uint16_t MenuForeColor;
 
 #define PAGE_SIZE 8
 #define MenuLen(m) (sizeof(m)/sizeof(MenuItem))
