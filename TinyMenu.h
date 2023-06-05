@@ -3,10 +3,14 @@
 #ifndef TINYMENU_H
 #define TINYMENU_H
 
+#define TINYMENU_ITEM_MAX 10
+const int MenuItemMax = TINYMENU_ITEM_MAX;
+
 struct MenuItem
 {
-  const char* MenuName;
-  MenuItem (*SubMenu)[];
+  const char *MenuName;
+  int SubMenuCount = 0;
+  MenuItem (*SubMenu)[MenuItemMax];
 };
 
 extern TFT_eSPI tft;
@@ -14,8 +18,8 @@ extern uint16_t MenuBackColor;
 extern uint16_t MenuForeColor;
 
 #define PAGE_SIZE 8
-#define MenuLen(m) (sizeof(m)/sizeof(MenuItem))
+#define MenuLen(m) (sizeof(m) / sizeof(MenuItem))
 
-void initMenu(MenuItem Menu[],int size);
+void initMenu(MenuItem Menu[], int size);
 
 #endif

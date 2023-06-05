@@ -25,18 +25,22 @@ void initMenu(MenuItem Menu[], int size)
     tft.fillScreen(MenuBackColor);
     pinMode(nextPin, INPUT_PULLUP);
     pinMode(prevPin, INPUT_PULLUP);
+    pinMode(okPin, INPUT_PULLUP);
+    pinMode(backPin, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(nextPin), nextButton, FALLING);
-    attachInterrupt(prevPin, prevButton, FALLING);
+    attachInterrupt(digitalPinToInterrupt(prevPin), prevButton, FALLING);
+    attachInterrupt(digitalPinToInterrupt(okPin), okButton, FALLING);
     renderMenu(Menu, size, 0);
 }
 
 void renderMenu(MenuItem menu[], int size, int mode)
 {
     int menuIndex = 0;
-    int realPageSize=0;
+    int realPageSize = 0;
 
     if (Current == NULL)
     {
+        firstRowIndex=0;
         lastRowIndex = size;
         if (size < PAGE_SIZE)
         {
@@ -162,11 +166,14 @@ void prevButton()
 
 void okButton()
 {
-    
+    MenuItem *sub=*(Current[selectedIndex].SubMenu);
+    int size = Current[selectedIndex].SubMenuCount;
+
+    if(sub == NULL) return;
+    Current = NULL;
+    renderMenu(sub, size, 0);
 }
 
 void backButton()
 {
-
 }
-
