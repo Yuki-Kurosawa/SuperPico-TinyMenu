@@ -13,6 +13,12 @@ struct MenuItem
   MenuItem (*SubMenu)[MenuItemMax];
 };
 
+struct CacheMenuItem
+{
+  int SubMenuSize=0;
+  MenuItem *SubMenu;
+};
+
 extern TFT_eSPI tft;
 extern uint16_t MenuBackColor;
 extern uint16_t MenuForeColor;

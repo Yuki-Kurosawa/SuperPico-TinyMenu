@@ -11,6 +11,9 @@ volatile int selectedIndex = 0;
 volatile int menuSize = 0;
 volatile int firstRowIndex = 0;
 volatile int lastRowIndex = 0;
+volatile int cacheIndex = 0;
+
+CacheMenuItem CacheMenu[10] = {0};
 
 void renderMenu(MenuItem menu[], int size, int mode);
 void renderMenuMove(MenuItem menu[], int size, int mode);
@@ -30,6 +33,7 @@ void initMenu(MenuItem Menu[], int size)
     attachInterrupt(digitalPinToInterrupt(nextPin), nextButton, FALLING);
     attachInterrupt(digitalPinToInterrupt(prevPin), prevButton, FALLING);
     attachInterrupt(digitalPinToInterrupt(okPin), okButton, FALLING);
+    attachInterrupt(digitalPinToInterrupt(backPin), backButton, FALLING);
     renderMenu(Menu, size, 0);
 }
 
@@ -40,7 +44,7 @@ void renderMenu(MenuItem menu[], int size, int mode)
 
     if (Current == NULL)
     {
-        firstRowIndex=0;
+        firstRowIndex = 0;
         lastRowIndex = size;
         if (size < PAGE_SIZE)
         {
@@ -166,14 +170,39 @@ void prevButton()
 
 void okButton()
 {
-    MenuItem *sub=*(Current[selectedIndex].SubMenu);
+    MenuItem *sub = *(Current[selectedIndex].SubMenu);
     int size = Current[selectedIndex].SubMenuCount;
 
-    if(sub == NULL) return;
+    if (sub == NULL)
+        return;
+
+    
+    CacheMenu[cacheIndex] = {
+        Current->SubMenuCount,
+        Current};
+    cacheIndex++;
     Current = NULL;
     renderMenu(sub, size, 0);
 }
 
 void backButton()
 {
+    int par = cacheIndex - 1;
+    if (par < 0)
+        return;
+
+    cacheIndex--;
+    MenuItem *sub = CacheMenu[cacheIndex].SubMenu;
+
+    int size=3;
+    if(cacheIndex>0){
+        size = CacheMenu[cacheIndex-1].SubMenuSize;
+    }
+    
+    Current = NULL;
+    Serial.print(sub->MenuName);
+    Serial.print('=');
+    Serial.println(size);
+    tft.fillScreen(MenuBackColor);
+    renderMenu(sub, size, 0);
 }
