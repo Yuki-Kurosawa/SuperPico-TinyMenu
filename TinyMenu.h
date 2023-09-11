@@ -6,10 +6,14 @@
 #define TINYMENU_ITEM_MAX 10
 const int MenuItemMax = TINYMENU_ITEM_MAX;
 
+typedef void(*MenuClickEvent)();
+
+
 struct MenuItem
 {
   const char *MenuName;
-  int SubMenuCount = 0;
+  int SubMenuCount = 0;  
+  MenuClickEvent OnMenuClick;
   MenuItem (*SubMenu)[MenuItemMax];
 };
 

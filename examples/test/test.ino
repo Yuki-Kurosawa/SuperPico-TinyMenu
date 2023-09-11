@@ -22,17 +22,24 @@ MenuItem Menu[] PROGMEM = {
   // { "Menu 12", 0 }
 };
 
+void nothing()
+{
+
+}
+
 MenuItem Menu1[10] = {
-  { "Menu 1.1", 0 },
+  { "Menu 1.1", 0, nothing },
   { "Menu 1.2", 4 },
   { "Menu 1.3", 0 }
 };
 
+
+
 MenuItem Menu1_2[10] = {
-  { "Menu 1.2.1", 0 },
-  { "Menu 1.2.2", 0 },
-  { "Menu 1.2.3", 0 },
-  { "Menu 1.2.4", 0 }
+  { "Menu 1.2.1", 0, nothing },
+  { "Menu 1.2.2", 0, nothing },
+  { "Menu 1.2.3", 0, nothing },
+  { "Menu 1.2.4", 0, nothing }
 };
 
 

@@ -174,7 +174,17 @@ void okButton()
     int size = Current[selectedIndex].SubMenuCount;
 
     if (sub == NULL)
+    {
+        Serial.print("MenuItem [");
+        Serial.print(Current[selectedIndex].MenuName);
+        Serial.println("] Clicked");
+        
+        if(Current[selectedIndex].OnMenuClick!=nullptr)
+        {            
+            (*Current[selectedIndex].OnMenuClick)();
+        }
         return;
+    }
 
     
     CacheMenu[cacheIndex] = {
